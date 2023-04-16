@@ -1,0 +1,442 @@
+
+config defaults
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option flow_offloading '0'
+	option flow_offloading_hw '0'
+	option fullcone '1'
+	option synflood_protect '1'
+	option forward 'ACCEPT'
+
+config zone
+	option name 'lan'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	list network 'lan'
+	list network 'ipv6'
+
+config zone
+	option name 'wan'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option masq '1'
+	option mtu_fix '1'
+	option forward 'ACCEPT'
+	list network 'wan'
+	list network 'wan6'
+
+config forwarding
+	option src 'lan'
+	option dest 'wan'
+
+config rule
+	option name 'Allow-DHCP-Renew'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '68'
+	option target 'ACCEPT'
+	option family 'ipv4'
+
+config rule
+	option name 'Allow-Ping'
+	option src 'wan'
+	option proto 'icmp'
+	option icmp_type 'echo-request'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IGMP'
+	option src 'wan'
+	option proto 'igmp'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCPv6'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '546'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-MLD'
+	option src 'wan'
+	option proto 'icmp'
+	option src_ip 'fe80::/10'
+	list icmp_type '130/0'
+	list icmp_type '131/0'
+	list icmp_type '132/0'
+	list icmp_type '143/0'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Input'
+	option src 'wan'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	list icmp_type 'router-solicitation'
+	list icmp_type 'neighbour-solicitation'
+	list icmp_type 'router-advertisement'
+	list icmp_type 'neighbour-advertisement'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Forward'
+	option src 'wan'
+	option dest '*'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IPSec-ESP'
+	option src 'wan'
+	option dest 'lan'
+	option proto 'esp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ISAKMP'
+	option src 'wan'
+	option dest 'lan'
+	option dest_port '500'
+	option proto 'udp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Support-UDP-Traceroute'
+	option src 'wan'
+	option dest_port '33434:33689'
+	option proto 'udp'
+	option family 'ipv4'
+	option target 'REJECT'
+	option enabled '0'
+
+config include
+	option path '/etc/firewall.user'
+
+config include 'miniupnpd'
+	option type 'script'
+	option path '/usr/share/miniupnpd/firewall.include'
+	option family 'any'
+	option reload '1'
+
+config include 'socat'
+	option type 'script'
+	option path '/var/etc/socat.include'
+	option reload '1'
+
+config include 'softethervpn'
+	option type 'script'
+	option path '/var/etc/softethervpn.include'
+	option reload '1'
+
+config include 'passwall'
+	option type 'script'
+	option path '/var/etc/passwall.include'
+	option reload '1'
+
+config include 'passwall_server'
+	option type 'script'
+	option path '/var/etc/passwall_server.include'
+	option reload '1'
+
+config include 'passwall2'
+	option type 'script'
+	option path '/var/etc/passwall2.include'
+	option reload '1'
+
+config include 'passwall2_server'
+	option type 'script'
+	option path '/var/etc/passwall2_server.include'
+	option reload '1'
+
+config include 'unblockmusic'
+	option type 'script'
+	option path '/var/etc/unblockmusic.include'
+	option reload '1'
+
+config rule 'kms'
+	option name 'kms'
+	option target 'ACCEPT'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '1688'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'web'
+	option src 'wan'
+	option src_dport '8088'
+	option dest_port '80'
+	option dest_ip '192.168.3.1'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'pt'
+	option src 'wan'
+	option src_dport '51314'
+	option dest_ip '192.168.3.100'
+	option dest_port '51314'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'sshd'
+	option src 'wan'
+	option src_dport '2222'
+	option dest_ip '192.168.3.100'
+	option dest_port '22'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'aria'
+	option src 'wan'
+	option src_dport '6800'
+	option dest_ip '192.168.3.100'
+	option dest_port '6800'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'docker'
+	option src 'wan'
+	option src_dport '9000'
+	option dest_ip '192.168.3.100'
+	option dest_port '9000'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'bt'
+	option src 'wan'
+	option src_dport '6888'
+	option dest_ip '192.168.3.100'
+	option dest_port '6888'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'tr'
+	option src 'wan'
+	option src_dport '9091'
+	option dest_ip '192.168.3.100'
+	option dest_port '9091'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'ddns'
+	option src 'wan'
+	option src_dport '9877'
+	option dest_ip '192.168.3.100'
+	option dest_port '9877'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'emby'
+	option src 'wan'
+	option src_dport '8096'
+	option dest_ip '192.168.3.100'
+	option dest_port '8096'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'xun'
+	option src 'wan'
+	option src_dport '2345'
+	option dest_ip '192.168.3.100'
+	option dest_port '2345'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'adg'
+	option src 'wan'
+	option src_dport '3000'
+	option dest_ip '192.168.3.100'
+	option dest_port '3000'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'nt'
+	option src 'wan'
+	option src_dport '3001'
+	option dest_port '3001'
+	option dest_ip '192.168.3.100'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'yacd'
+	option src 'wan'
+	option dest_ip '192.168.3.1'
+	option src_dport '9090'
+	option dest_port '9090'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'dav'
+	option src 'wan'
+	option src_dport '5005'
+	option dest_ip '192.168.3.100'
+	option dest_port '5005'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'jacket'
+	option src 'wan'
+	option src_dport '9117'
+	option dest_ip '192.168.3.100'
+	option dest_port '9117'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'linkea'
+	option src 'wan'
+	option src_dport '8897'
+	option dest_ip '192.168.3.100'
+	option dest_port '8897'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'xtv'
+	option src 'wan'
+	option src_dport '34400'
+	option dest_ip '192.168.3.100'
+	option dest_port '34400'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'rss'
+	option src 'wan'
+	option src_dport '1200'
+	option dest_ip '192.168.3.100'
+	option dest_port '1200'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'rssh'
+	option src 'wan'
+	option src_dport '181'
+	option dest_ip '192.168.3.100'
+	option dest_port '181'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'webmin'
+	option src 'wan'
+	option src_dport '10000'
+	option dest_ip '192.168.3.100'
+	option dest_port '10000'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option src 'wan'
+	option src_dport '8800'
+	option dest_ip '192.168.3.100'
+	option dest_port '8800'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'sub'
+	option src 'wan'
+	option src_dport '19035'
+	option dest_ip '192.168.3.100'
+	option dest_port '19035'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'nt2'
+	option src 'wan'
+	option src_dport '3002'
+	option dest_ip '192.168.3.100'
+	option dest_port '3002'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option src 'wan'
+	option src_dport '3210'
+	option dest_ip '192.168.3.100'
+	option dest_port '3210'
+
+config rule
+	option src 'wan'
+	option src_port '8088'
+	option dest_port '80'
+	option target 'ACCEPT'
+
+config rule
+	option name '9'
+	option src 'wan'
+	option src_port '9090'
+	option dest_port '9090'
+	option target 'ACCEPT'
+	list dest_ip '192.168.3.1'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'ck'
+	option src 'wan'
+	option src_dport '8089'
+	option dest_ip '192.168.3.100'
+	option dest_port '8089'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name '5005'
+	option src 'wan'
+	option dest_ip '192.168.3.100'
+	option src_dport '5800'
+	option dest_port '5800'
+
+config include 'openclash'
+	option type 'script'
+	option path '/var/etc/openclash.include'
+	option reload '1'
+
+config include 'iptvhelper'
+	option type 'script'
+	option path '/etc/firewall.iptvhelper'
+	option family 'any'
+	option reload '1'
+
