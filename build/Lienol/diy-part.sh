@@ -35,6 +35,9 @@ export Create_Ipv6_Lan="0"                  # 爱快+OP双系统时,爱快接管
 export Enable_IPV6_function="1"             # 编译IPV6固件(1为启用命令,填0为不作修改)(如果跟Create_Ipv6_Lan一起启用命令的话,Create_Ipv6_Lan命令会自动关闭)
 export Enable_IPV4_function="0"             # 编译IPV4固件(1为启用命令,填0为不作修改)(如果跟Enable_IPV6_function一起启用命令的话,此命令会自动关闭)
 
+# K3专用，编译K3的时候只会出K3固件（其他机型也适宜,把phicomm_k3和对应路径替换一下，名字要绝对正确才行）
+sed -i 's|^TARGET_|# TARGET_|g; s|# TARGET_DEVICES += phicomm_k3|TARGET_DEVICES += phicomm_k3|' target/linux/bcm53xx/image/Makefile
+
 # 替换passwall的源码(默认luci分支)
 export PassWall_luci_branch="0"             # passwall的源码分别有【luci分支】和【luci-smartdns-new-version分支】(填0为使用luci分支,填1为使用luci-smartdns-new-version分支)
 
